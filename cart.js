@@ -168,20 +168,14 @@ function totalPriceCalcul(products){
   document.getElementById("totalPrice").innerText = totalPrice;
 }
 
-
-
 let firstNameErrorMsg = document.getElementById("firstNameErrorMsg");
 let lastNameErrorMsg = document.getElementById("lastNameErrorMsg");
 let cityErrorMsg = document.getElementById("cityErrorMsg");
-
-
-
 
 let addressErrorMsg = document.getElementById("addressErrorMsg");
 
 let emailErrorMsg = document.getElementById("emailErrorMsg");
 let inputEmail = document.getElementById("email");
-let inputEmailValue = inputEmail.value;
 
 function validateEmail(email){
   let emailReg = new RegExp('^[0-9a-z._-]+@{1}[0-9a-z.-]{2,}[.]{1}[a-z]{2,5}$','i');
@@ -197,33 +191,15 @@ function validateEmail(email){
 
 inputEmail.addEventListener("change", (event) => {
   event.stopPropagation();
-  if(!validateEmail(inputEmailValue)){
-    emailErrorMsg.innerText = "Erreur : le format doit être azerty@domaine.com";
+  const valueEmail = event.target.value;
+ 
+  if(!validateEmail(valueEmail)){
+    emailErrorMsg.innerText = "Erreur : l'email doit être au format azerty@domaine.com";
+  } else {
+    emailErrorMsg.innerText = "";
   }
+  console.log(valueEmail);
 });
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 // function validateString(str){
 //   let strReg = new RegExp(/^[a-z ,.'-]+$/i);
