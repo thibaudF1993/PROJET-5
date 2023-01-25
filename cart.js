@@ -168,19 +168,24 @@ function totalPriceCalcul(products){
   document.getElementById("totalPrice").innerText = totalPrice;
 }
 
+
+let firstName = document.getElementById("firstName");
+let lastName = document.getElementById("lastName");
+let address = document.getElementById("address");
+let city = document.getElementById("city");
+let inputEmail = document.getElementById("email");
+
 let firstNameErrorMsg = document.getElementById("firstNameErrorMsg");
 let lastNameErrorMsg = document.getElementById("lastNameErrorMsg");
 let cityErrorMsg = document.getElementById("cityErrorMsg");
-
 let addressErrorMsg = document.getElementById("addressErrorMsg");
-
 let emailErrorMsg = document.getElementById("emailErrorMsg");
-let inputEmail = document.getElementById("email");
 
+
+// Fonction qui retourne TRUE ou FALSE si une adresse email est mal écrite
 function validateEmail(email){
   let emailReg = new RegExp('^[0-9a-z._-]+@{1}[0-9a-z.-]{2,}[.]{1}[a-z]{2,5}$','i');
   let valid = emailReg.test(email);
-  console.log(valid);
 
   if(!valid) {
       return false;
@@ -189,6 +194,9 @@ function validateEmail(email){
   }
 }
 
+
+// Evenement sur l'input de l'eamil qui appelle la fonction validateEmail; 
+// et qui retourne un message d'erreur le cas échéant
 inputEmail.addEventListener("change", (event) => {
   event.stopPropagation();
   const valueEmail = event.target.value;
@@ -201,20 +209,140 @@ inputEmail.addEventListener("change", (event) => {
   console.log(valueEmail);
 });
 
-// function validateString(str){
-//   let strReg = new RegExp(/^[a-z ,.'-]+$/i);
-//   let isStrvalid = strReg.test(str);
-//   console.log(isStrvalid);
+// Fonction qui retourne TRUE ou FALSE si la chaine de caractères 
+// des input Nom, Prénom, City est mal écrite (présence de chiffres ou caractèrtes spéciaux)
+function validateString(str){
+  let strReg = new RegExp(/^[a-zA-Z ,.'-]+$/i);
+  let isStrValid = strReg.test(str);
 
-//   if(!isStrvalid) {
-//       return false;
-//   } else {
-//       return true;
-//   }
-// }
+  if(!isStrValid) {
+      return false;
+  } else {
+      return true;
+  }
+}
 
-// if(!validateString("jean-marc-")){
-//   firstNameErrorMsg.innerText = "Erreur : pas de chiffres et de caractères spéciaux";
-//   lastNameErrorMsg.innerText = "Erreur : pas de chiffres et de caractères spéciaux";
-//   cityErrorMsg.innerText = "Erreur : pas de chiffres et de caractères spéciaux";
-// }
+// Evenement sur l'input du prénom qui appelle la fonction validateString; 
+// et qui retourne un message d'erreur le cas échéant
+firstName.addEventListener("change", (event) => {
+  event.stopPropagation();
+  const valueFirstName = event.target.value;
+ 
+  if(!validateString(valueFirstName)){
+    firstNameErrorMsg.innerText = "Erreur : pas de chiffres et de caractères spéciaux dans le prénom";
+  } else {
+    firstNameErrorMsg.innerText = "";
+  }
+  console.log(valueFirstName);
+});
+
+// Evenement sur l'input du nom de famille qui appelle la fonction validateString; 
+// et qui retourne un message d'erreur le cas échéant
+lastName.addEventListener("change", (event) => {
+  event.stopPropagation();
+  const valueLastName = event.target.value;
+ 
+  if(!validateString(valueLastName)){
+    lastNameErrorMsg.innerText = "Erreur : pas de chiffres et de caractères spéciaux dans le nom";
+  } else {
+    lastNameErrorMsg.innerText = "";
+  }
+  console.log(valueLastName);
+});
+
+// Evenement sur l'input de la ville qui appelle la fonction validateString; 
+// et qui retourne un message d'erreur le cas échéant
+city.addEventListener("change", (event) => {
+  event.stopPropagation();
+  const valueCity = event.target.value;
+ 
+  if(!validateString(valueCity)){
+    cityErrorMsg.innerText = "Erreur : pas de chiffres et de caractères spéciaux dans le nom de la ville";
+  } else {
+    cityErrorMsg.innerText = "";
+  }
+  console.log(valueCity);
+});
+
+
+// Fonction qui retourne TRUE ou FALSE si la chaine de caractères 
+// de l'input Adresse est mal écrite
+function validateAddress(address){
+  let addressReg = new RegExp(/^[\w\séèêàç,.'-]*$/);
+  let isAddressValid = addressReg.test(address);
+
+  if(!isAddressValid) {
+      return false;
+  } else {
+      return true;
+  }
+}
+
+// Evenement sur l'input de l'adresse qui appelle la fonction validateAddress; 
+// et qui retourne un message d'erreur le cas échéant
+address.addEventListener("change", (event) => {
+  event.stopPropagation();
+  const valueAdress = event.target.value;
+ 
+  if(!validateAddress(valueAdress)){
+    addressErrorMsg.innerText = "Erreur dans l'adresse";
+  } else {
+    addressErrorMsg.innerText = "";
+  }
+  console.log(valueAdress);
+});
+
+function retrievesContactAndIds(){
+  let contact = {
+    firstName: firstName.value,
+    lastName: lastName.value,
+    address: address.value,
+    city: city.value,
+    email: email.value,
+  };
+  console.log(contact);
+
+  const arrayIds = [];
+  for(let i = 0; i < productInCart.length; i ++) {
+    let productsID = productInCart[i].id;
+    arrayIds.push(productsID);
+  }
+}
+
+async function registerForConfirming() {
+  retrievesContactAndIds()
+
+ const res = await fetch("http://localhost:3000/api/products/order", {
+  method: 'POST',
+  headers: {
+    'Accept': 'application/json',
+    'Content-Type': 'application/json'
+  },
+  body: JSON.stringify(objectToSend)
+  });
+  console.log(objectToSend);
+  console.log(res);
+
+  const returnValue = await res.json();
+  console.log(returnValue);
+
+  if(returnValue) {
+    sessionStorage.setItem('IDcommand', returnValue. orderId);
+    console.log(sessionStorage.getItem('IDcommand'));
+  } else {
+    alert("Une erreur est survenue. Veuillez réessayer ultérieurement.");
+  }
+  console.log(sessionStorage.getItem('IDcommand'));
+};
+
+async function confirm(){
+  await registerForConfirming();
+  document.location.href = "#";
+  console.log(sessionStorage.getItem('IDcommand'));
+}
+
+
+document.getElementById("order").addEventListener("click", function(e) {
+  e.preventDefault();
+  confirm();
+})
