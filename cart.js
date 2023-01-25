@@ -292,7 +292,15 @@ address.addEventListener("change", (event) => {
   console.log(valueAdress);
 });
 
-function retrievesContactAndIds(){
+
+
+const arrayIds = [];
+for(let i = 0; i < productInCart.length; i ++) {
+  let productsID = productInCart[i].id;
+  arrayIds.push(productsID);
+}
+
+async function registerForConfirming() {
   let contact = {
     firstName: firstName.value,
     lastName: lastName.value,
@@ -300,18 +308,12 @@ function retrievesContactAndIds(){
     city: city.value,
     email: email.value,
   };
-  console.log(contact);
 
-  const arrayIds = [];
-  for(let i = 0; i < productInCart.length; i ++) {
-    let productsID = productInCart[i].id;
-    arrayIds.push(productsID);
+  const objectToSend = {
+    contact: contact,
+    products: arrayIds
   }
-}
-
-async function registerForConfirming() {
-  retrievesContactAndIds()
-
+ 
  const res = await fetch("http://localhost:3000/api/products/order", {
   method: 'POST',
   headers: {
@@ -327,12 +329,13 @@ async function registerForConfirming() {
   console.log(returnValue);
 
   if(returnValue) {
-    sessionStorage.setItem('IDcommand', returnValue. orderId);
-    console.log(sessionStorage.getItem('IDcommand'));
+    sessionStorage.setItem('IDcommand', returnValue.orderId);
+    let orderID = sessionStorage.getItem('IDcommand');
+    console.log(orderID);
+
   } else {
     alert("Une erreur est survenue. Veuillez réessayer ultérieurement.");
   }
-  console.log(sessionStorage.getItem('IDcommand'));
 };
 
 async function confirm(){
@@ -340,7 +343,6 @@ async function confirm(){
   document.location.href = "#";
   console.log(sessionStorage.getItem('IDcommand'));
 }
-
 
 document.getElementById("order").addEventListener("click", function(e) {
   e.preventDefault();
