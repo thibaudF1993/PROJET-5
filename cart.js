@@ -88,36 +88,6 @@ const getProduct = fetch("http://localhost:3000/api/products")
   console.error(err);
 })
 
-// Fonction permettant de modifier la quantité d'un article sur la page panier
-function changeQty() {
-  let itemQuantity = document.querySelectorAll(".itemQuantity");
-
-  for(let q = 0; q < itemQuantity.length; q ++){
-    itemQuantity[q].addEventListener("change", (event) => {
-      event.stopPropagation();
-
-      // recupération des data-id et data-color
-      const btnQty = event.target;
-      let qtyProductSelected = btnQty.closest(".cart__item");
-      let idProductToChangeQty = qtyProductSelected.dataset.id;
-      let colorProductToChangeQty = qtyProductSelected.dataset.color;
-
-      let qtyFromItem = parseInt(btnQty.value, 10);
-      productInCart[q].qty = qtyFromItem;
-
-      // Trouver l'élément correspondant à une couleur et à un ID dans le panier, puis lui attribuer la quantité affichée dans l'input
-      const newProductInCart = productInCart.find((item) => (item.id == idProductToChangeQty) && (item.color == colorProductToChangeQty));
-      if(newProductInCart){
-        newProductInCart.qty = qtyFromItem;
-      }
-      
-      // Stockage données dans le panier
-      const productJSON = JSON.stringify(productInCart);
-      localStorage.setItem("cart", productJSON);
-      location.reload();
-    })
-  }
-}
 
 // Fonction de suppression d'un article sur la page panier
 function removeItem(){
@@ -145,6 +115,52 @@ function removeItem(){
     })
   }
 }
+
+
+// Fonction permettant de modifier la quantité d'un article sur la page panier
+function changeQty() {
+  let itemQuantity = document.querySelectorAll(".itemQuantity");
+
+  for(let q = 0; q < itemQuantity.length; q ++){
+    itemQuantity[q].addEventListener("change", (event) => {
+      event.stopPropagation();
+
+      // Limitation de la quantité par article à 100 maximum
+      if(itemQuantity[q].value > 100){
+        return false;
+      }
+
+      if(itemQuantity[q].value < 1){
+        localStorage.removeItem("cart");//////////////////////////////////////////////////////
+        //////////////////////////////////////////////////////////////////////////////////////////////////
+        //////////////////////////////////////////////////////////////////////////////////////////////////
+        //////////////////////////////////////////////////////////////////////////////////////////////////
+        return false;
+      }
+
+      // recupération des data-id et data-color
+      const btnQty = event.target;
+      let qtyProductSelected = btnQty.closest(".cart__item");
+      let idProductToChangeQty = qtyProductSelected.dataset.id;
+      let colorProductToChangeQty = qtyProductSelected.dataset.color;
+
+      let qtyFromItem = parseInt(btnQty.value, 10);
+      productInCart[q].qty = qtyFromItem;
+
+      // Trouver l'élément correspondant à une couleur et à un ID dans le panier, puis lui attribuer la quantité affichée dans l'input
+      const newProductInCart = productInCart.find((item) => (item.id == idProductToChangeQty) && (item.color == colorProductToChangeQty));
+      if(newProductInCart){
+        newProductInCart.qty = qtyFromItem;
+      }
+      
+      // Stockage données dans le panier
+      const productJSON = JSON.stringify(productInCart);
+      localStorage.setItem("cart", productJSON);
+      location.reload();
+    })
+  }
+}
+
 
 // Fonction calculant la quantité totale ainsi que le prix total
 function totalPriceCalcul(products){
@@ -188,9 +204,9 @@ function validateEmail(email){
   let valid = emailReg.test(email);
 
   if(!valid) {
-      return false;
+    return false;
   } else {
-      return true;
+    return true;
   }
 }
 
@@ -203,22 +219,22 @@ inputEmail.addEventListener("change", (event) => {
  
   if(!validateEmail(valueEmail)){
     emailErrorMsg.innerText = "Erreur : l'email doit être au format azerty@domaine.com";
+    return false;
   } else {
     emailErrorMsg.innerText = "";
   }
-  console.log(valueEmail);
 });
 
 // Fonction qui retourne TRUE ou FALSE si la chaine de caractères 
-// des input Nom, Prénom, City est mal écrite (présence de chiffres ou caractèrtes spéciaux)
-function validateString(str){
-  let strReg = new RegExp(/^[a-zA-Z ,.'-]+$/i);
+// des input Nom, Prénom, City est mal écrite (présence de chiffres ou caractères spéciaux)
+ function validateString(str){
+  let strReg = new RegExp(/^[a-zA-Z '-]+$/i);
   let isStrValid = strReg.test(str);
 
   if(!isStrValid) {
-      return false;
+    return false;
   } else {
-      return true;
+    return true;
   }
 }
 
@@ -229,12 +245,17 @@ firstName.addEventListener("change", (event) => {
   const valueFirstName = event.target.value;
  
   if(!validateString(valueFirstName)){
-    firstNameErrorMsg.innerText = "Erreur : pas de chiffres et de caractères spéciaux dans le prénom";
+    firstNameErrorMsg.innerText = "Erreur dans le prénom";
+    // return valueFirstName.replace(valueFirstName, undefined);//////////////////////////////////////////////////////////////////////////////////////////////////
+    //////////////////////////////////////////////////////////////////////////////////////////////////
+    //////////////////////////////////////////////////////////////////////////////////////////////////
+    //////////////////////////////////////////////////////////////////////////////////////////////////
+
   } else {
     firstNameErrorMsg.innerText = "";
   }
-  console.log(valueFirstName);
 });
+
 
 // Evenement sur l'input du nom de famille qui appelle la fonction validateString; 
 // et qui retourne un message d'erreur le cas échéant
@@ -243,11 +264,11 @@ lastName.addEventListener("change", (event) => {
   const valueLastName = event.target.value;
  
   if(!validateString(valueLastName)){
-    lastNameErrorMsg.innerText = "Erreur : pas de chiffres et de caractères spéciaux dans le nom";
+    lastNameErrorMsg.innerText = "Erreur dans le nom";
+    return false;
   } else {
     lastNameErrorMsg.innerText = "";
   }
-  console.log(valueLastName);
 });
 
 // Evenement sur l'input de la ville qui appelle la fonction validateString; 
@@ -257,11 +278,11 @@ city.addEventListener("change", (event) => {
   const valueCity = event.target.value;
  
   if(!validateString(valueCity)){
-    cityErrorMsg.innerText = "Erreur : pas de chiffres et de caractères spéciaux dans le nom de la ville";
+    cityErrorMsg.innerText = "Erreur dans le nom de la ville";
+    
   } else {
     cityErrorMsg.innerText = "";
   }
-  console.log(valueCity);
 });
 
 
@@ -272,9 +293,9 @@ function validateAddress(address){
   let isAddressValid = addressReg.test(address);
 
   if(!isAddressValid) {
-      return false;
+    return false;
   } else {
-      return true;
+    return true;
   }
 }
 
@@ -286,21 +307,18 @@ address.addEventListener("change", (event) => {
  
   if(!validateAddress(valueAdress)){
     addressErrorMsg.innerText = "Erreur dans l'adresse";
+    return false;
   } else {
     addressErrorMsg.innerText = "";
   }
-  console.log(valueAdress);
 });
 
-
-
-const arrayIds = [];
-for(let i = 0; i < productInCart.length; i ++) {
-  let productsID = productInCart[i].id;
-  arrayIds.push(productsID);
-}
-
-async function registerForConfirming() {
+async function SendData() {
+  // Constitution d'un objet Contact avec les données du formulaire
+  //////////////////////////////////////////////////////////////////////////////////////////////////
+  //////////////////////////////////////////////////////////////////////////////////////////////////
+  //////////////////////////////////////////////////////////////////////////////////////////////////
+  //////////////////////////////////////////////////////////////////////////////////////////////////
   let contact = {
     firstName: firstName.value,
     lastName: lastName.value,
@@ -308,42 +326,70 @@ async function registerForConfirming() {
     city: city.value,
     email: email.value,
   };
+  console.log(contact);
 
+  // Création d'une boucle dans le local storage afin de récuperer seulement les Id produits dans un tableau
+  const arrayIds = [];
+  for(let i = 0; i < productInCart.length; i ++) {
+    let productsID = productInCart[i].id;
+    arrayIds.push(productsID);
+  }
+  // Si panier vide => impossible de passser une commande
+  if(arrayIds.length == 0){
+    console.error("Veuillez mettre des articles dans vore panier afin de passer commande svp.")
+    return false;
+  }
+
+  // Constitution d'un objet global contenant l'objet contact et le tableau de Id produits
   const objectToSend = {
     contact: contact,
     products: arrayIds
   }
  
- const res = await fetch("http://localhost:3000/api/products/order", {
-  method: 'POST',
-  headers: {
-    'Accept': 'application/json',
-    'Content-Type': 'application/json'
-  },
-  body: JSON.stringify(objectToSend)
+  // Requête POST avec l'objet global en body
+  const res = await fetch("http://localhost:3000/api/products/order", {
+    method: 'POST',
+    headers: {
+      'Accept': 'application/json',
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify(objectToSend)
   });
   console.log(objectToSend);
   console.log(res);
 
+// On attend la conversion du corps de la réponse en JSON, puis on récupère le corps de la réponse
   const returnValue = await res.json();
-  console.log(returnValue);
+  const orderID = returnValue.orderId;
 
+  await getSessionStorage(orderID, returnValue);
+}
+
+async function getSessionStorage(orderID, returnValue){
+  // Si on a une réponse de l'API, on met à jour la session storage
   if(returnValue) {
-    sessionStorage.setItem('IDcommand', returnValue.orderId);
-    let orderID = sessionStorage.getItem('IDcommand');
-    console.log(orderID);
-
+    sessionStorage.setItem('IDcommand', orderID);
+    let sessionNumber = sessionStorage.getItem('IDcommand');
+    console.log(sessionNumber);
   } else {
     alert("Une erreur est survenue. Veuillez réessayer ultérieurement.");
   }
+
+  // Si pas de numéro de commande => message d'erreur, 
+  // sinon => changement d'url pour la page Confirmation 
+  if(orderID == undefined){
+    console.error("Une erreur est survenue. Assurez vous que tous les champs du formulaire soient correctement remplis.")
+  } else {
+    document.location.href = `./confirmation.html?orderID=${sessionStorage.getItem('IDcommand')}`;
+  }
 };
 
+// Appel de la fonction SendData(); attente de la fin de son traitement
 async function confirm(){
-  await registerForConfirming();
-  document.location.href = "#";
-  console.log(sessionStorage.getItem('IDcommand'));
+  await SendData();
 }
 
+// Evenement sur le bouton "commander" avec appel de la fonction confirm()
 document.getElementById("order").addEventListener("click", function(e) {
   e.preventDefault();
   confirm();
