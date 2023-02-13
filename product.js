@@ -1,6 +1,5 @@
 // Étape 5 : Récupérer l’id du produit à afficher
 
-
 const queryString_id = window.location.search;
 const urlSearchParams = new URLSearchParams(queryString_id);
 const theId = urlSearchParams.get("id");
@@ -61,6 +60,10 @@ cart.addEventListener("click", (event) => {
     const color = colorsElt.value;
     const qty = parseInt(qtyElt.value, 10); // Transformation de la chaine de caracteres en nombre
 
+    // Si quantité non comprise entre 1 et 100, ne pas la prendre en compte 
+    if(qty > 100 || qty < 1){
+        return false;
+    }
 
     // SI aucune couleur ou quantité sélectionnées, pas d'ajout au panier
     if (!color || !qty){
@@ -77,11 +80,23 @@ cart.addEventListener("click", (event) => {
     
     // Cherche dans le panier si il y a deja cet élément
     const existingProduct = productInCart.find((p) => (p.id == theId) && (p.color == color));
+    console.log(existingProduct);
 
+
+    // Si élément déja dans le panier (même id et même couleur)
     if(existingProduct){
-        // Si élément déja dans le panier (même id et même couleur) , on incrémente la quantité
+        
+        // ET si quantité de l'élément est supérieure à 100, retourne false
+        if(existingProduct.qty > 100){
+            return false;
 
-        existingProduct.qty += qty;
+        // ET SINON, fixe une limite maximale dans le calcul de la quantité de cet élément
+        } else {
+            let maxQty = existingProduct.qty += qty;
+            if(maxQty > 100){
+                return false;
+            }
+        }
     } else {
 
         // Sinon, on ajoute l'objet dans le panier avec son ID, sa couleur et la quantité choisie
@@ -94,11 +109,6 @@ cart.addEventListener("click", (event) => {
     }
 
     // Stockage données dans le panier
-const productJSON = JSON.stringify(productInCart);
-localStorage.setItem("cart", productJSON);
+    const productJSON = JSON.stringify(productInCart);
+    localStorage.setItem("cart", productJSON);
 });
-
-
-
-
-
