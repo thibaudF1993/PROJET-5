@@ -72,7 +72,7 @@ function getElem(products){
       newH2.innerText = existingItem.name;
     }
   }
-  totalPriceCalcul(products);
+  priceAndTotalQtyDisplay(products);
 }
 
 // Requête auprès de l'API
@@ -88,11 +88,15 @@ const getProduct = fetch("http://localhost:3000/api/products")
   console.error(err);
 })
 
+// Fonction affichant la quantité totale + prix total 
+function priceAndTotalQtyDisplay(products){
+  priceAndTotalQtyCalcul(products);
+  changeQty(products);
+  removeItem();
+}
 
 // Fonction de suppression d'un article sur la page panier
 function removeItem(){
-
-  // Sélection des balises pour suppression d'un article
   let removeElement = document.querySelectorAll(".deleteItem");
 
   for(let e = 0; e < removeElement.length; e++){
@@ -116,9 +120,8 @@ function removeItem(){
   }
 }
 
-
 // Fonction permettant de modifier la quantité d'un article sur la page panier
-function changeQty() {
+function changeQty(products) {
   let itemQuantity = document.querySelectorAll(".itemQuantity");
 
   for(let q = 0; q < itemQuantity.length; q ++){
@@ -126,15 +129,7 @@ function changeQty() {
       event.stopPropagation();
 
       // Limitation de la quantité par article à 100 maximum
-      if(itemQuantity[q].value > 100){
-        return false;
-      }
-
-      if(itemQuantity[q].value < 1){
-        localStorage.removeItem("cart");//////////////////////////////////////////////////////
-        //////////////////////////////////////////////////////////////////////////////////////////////////
-        //////////////////////////////////////////////////////////////////////////////////////////////////
-        //////////////////////////////////////////////////////////////////////////////////////////////////
+      if(itemQuantity[q].value > 100 || itemQuantity[q].value < 1){
         return false;
       }
 
@@ -148,23 +143,20 @@ function changeQty() {
       productInCart[q].qty = qtyFromItem;
 
       // Trouver l'élément correspondant à une couleur et à un ID dans le panier, puis lui attribuer la quantité affichée dans l'input
-      const newProductInCart = productInCart.find((item) => (item.id == idProductToChangeQty) && (item.color == colorProductToChangeQty));
-      if(newProductInCart){
-        newProductInCart.qty = qtyFromItem;
+      const matchingProduct = productInCart.find((item) => (item.id == idProductToChangeQty) && (item.color == colorProductToChangeQty));
+      if(matchingProduct){
+        matchingProduct.qty = qtyFromItem;
       }
-      
-      // Stockage données dans le panier
-      const productJSON = JSON.stringify(productInCart);
-      localStorage.setItem("cart", productJSON);
-      location.reload();
+
+      // Appel de la fonction de calcul de la quantité et du prix final
+      priceAndTotalQtyCalcul(products);
     })
   }
 }
 
-
-// Fonction calculant la quantité totale ainsi que le prix total
-function totalPriceCalcul(products){
-  let totalqty = 0;
+// Fonction calculant la quantité totale +  prix total
+function priceAndTotalQtyCalcul(products){
+  let totalQty = 0;
   let totalPrice = 0;
 
   for ( let i = 0; i < productInCart.length; i++) {
@@ -174,29 +166,28 @@ function totalPriceCalcul(products){
     if(productFound) {
       let pricePerProduct = productFound.price;
       let localPrice = qtySelected*pricePerProduct;
-      totalqty += qtySelected;
+      totalQty += qtySelected;
       totalPrice += localPrice;
     } 
-  }  
-  changeQty();
-  removeItem();
-  document.getElementById("totalQuantity").innerText = totalqty;
-  document.getElementById("totalPrice").innerText = totalPrice;
+      // Stockage données dans le panier
+      const productJSON = JSON.stringify(productInCart);
+      localStorage.setItem("cart", productJSON);
+    
+    document.getElementById("totalQuantity").innerText = totalQty;
+    document.getElementById("totalPrice").innerText = totalPrice;
+  }
 }
-
 
 let firstName = document.getElementById("firstName");
 let lastName = document.getElementById("lastName");
 let address = document.getElementById("address");
 let city = document.getElementById("city");
 let inputEmail = document.getElementById("email");
-
 let firstNameErrorMsg = document.getElementById("firstNameErrorMsg");
 let lastNameErrorMsg = document.getElementById("lastNameErrorMsg");
 let cityErrorMsg = document.getElementById("cityErrorMsg");
 let addressErrorMsg = document.getElementById("addressErrorMsg");
 let emailErrorMsg = document.getElementById("emailErrorMsg");
-
 
 // Fonction qui retourne TRUE ou FALSE si une adresse email est mal écrite
 function validateEmail(email){
@@ -209,7 +200,6 @@ function validateEmail(email){
     return true;
   }
 }
-
 
 // Evenement sur l'input de l'eamil qui appelle la fonction validateEmail; 
 // et qui retourne un message d'erreur le cas échéant
@@ -246,11 +236,7 @@ firstName.addEventListener("change", (event) => {
  
   if(!validateString(valueFirstName)){
     firstNameErrorMsg.innerText = "Erreur dans le prénom";
-    // return valueFirstName.replace(valueFirstName, undefined);//////////////////////////////////////////////////////////////////////////////////////////////////
-    //////////////////////////////////////////////////////////////////////////////////////////////////
-    //////////////////////////////////////////////////////////////////////////////////////////////////
-    //////////////////////////////////////////////////////////////////////////////////////////////////
-
+    return false;
   } else {
     firstNameErrorMsg.innerText = "";
   }
@@ -279,12 +265,11 @@ city.addEventListener("change", (event) => {
  
   if(!validateString(valueCity)){
     cityErrorMsg.innerText = "Erreur dans le nom de la ville";
-    
+    return false;
   } else {
     cityErrorMsg.innerText = "";
   }
 });
-
 
 // Fonction qui retourne TRUE ou FALSE si la chaine de caractères 
 // de l'input Adresse est mal écrite
@@ -315,10 +300,7 @@ address.addEventListener("change", (event) => {
 
 async function SendData() {
   // Constitution d'un objet Contact avec les données du formulaire
-  //////////////////////////////////////////////////////////////////////////////////////////////////
-  //////////////////////////////////////////////////////////////////////////////////////////////////
-  //////////////////////////////////////////////////////////////////////////////////////////////////
-  //////////////////////////////////////////////////////////////////////////////////////////////////
+
   let contact = {
     firstName: firstName.value,
     lastName: lastName.value,
@@ -336,7 +318,7 @@ async function SendData() {
   }
   // Si panier vide => impossible de passser une commande
   if(arrayIds.length == 0){
-    console.error("Veuillez mettre des articles dans vore panier afin de passer commande svp.")
+    console.error("Veuillez mettre des articles dans votre panier afin de passer commande.")
     return false;
   }
 
@@ -358,10 +340,11 @@ async function SendData() {
   console.log(objectToSend);
   console.log(res);
 
-// On attend la conversion du corps de la réponse en JSON, puis on récupère le corps de la réponse
+// On attend la conversion du corps de la réponse en JSON, puis on la récupère 
   const returnValue = await res.json();
   const orderID = returnValue.orderId;
 
+  // On appelle la fonction getSessionStorage puis on attend la fin de son traitement
   await getSessionStorage(orderID, returnValue);
 }
 
@@ -389,8 +372,13 @@ async function confirm(){
   await SendData();
 }
 
-// Evenement sur le bouton "commander" avec appel de la fonction confirm()
+// Evenement sur le bouton "commander"
+// Si les fonctions de validation des champs du formulaire sont toutes OK, appel de la fonction confirm()
 document.getElementById("order").addEventListener("click", function(e) {
   e.preventDefault();
-  confirm();
+  if(validateAddress(address.value) && validateString(lastName.value) && validateString(firstName.value) && validateString(city.value) && validateEmail(inputEmail.value)){
+    confirm();
+  } else {
+    console.error("Une erreur est survenue. Assurez vous que tous les champs du formulaire soient correctement remplis, ou qu'il y ait des articles dans votre panier.")
+  }
 })
