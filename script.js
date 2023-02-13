@@ -4,9 +4,6 @@
 // Étape 4 : Faire le lien entre un produit de la page
 // d’accueil et la page Produit
 
-
-
-
 function createProduct(product, parentNode) {
   // création d'éléments dans le DOM
 
@@ -54,6 +51,3 @@ const getData = fetch("http://localhost:3000/api/products")
   .catch(function(err) {
     console.error(err);
   });
-
-
-
